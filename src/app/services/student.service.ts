@@ -1,42 +1,43 @@
 import { Student } from "../student/student";
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from "@angular/core";
 
+@Injectable()
 export class StudentService{
-    private students:Array<Student>=[
-        new Student(1,"Paul","M","Mark","28"),
-        new Student(2,"Jack", "R","Lewis","30")
-    ];
+    private url:string ="http://localhost:8080/students";
+    
+    constructor(private _httpClient:HttpClient){
+
+    }
 
     getAll(){
-        return this.students;
+        return this._httpClient.get(this.url);
     }
     
     delete(studentId){
-
+         return this._httpClient.delete(`${this.url}/${studentId}`,{observe:'response'});
     }
 
     getById(studentId){
-        for(let student of this.students){
-            if(student.studentId === studentId){
-                return student;
-            }
-        }
-        return null;
+        return this._httpClient.get(`${this.url}/${studentId}`);
     }
 
     save(obj){
-        if(obj.studentId === -1){
-            obj.studentId = this.getMaxId();
-            this.students.push(obj);
-        }else{
-            console.log(obj);
-            const index = this.students.findIndex(a => a.studentId === obj.studentId);
-            console.log(index);
-            this.students[index] = obj;
-        }
+       console.log(obj);
+       const httpOptions={
+        headers: new HttpHeaders({
+           'Content-Type':'application/json'
+       })
+    };
 
-        
+    if(obj.studentId){
+        return this._httpClient.put(`${this.url}/${obj.studentId}`,JSON.stringify(obj),httpOptions);
+
     }
-
+       return this._httpClient.post(this.url,JSON.stringify(obj),httpOptions);
+    }  
+} 
+/*
     getMaxId(){
         let maxId=0;
         for(let a of this.students){
@@ -45,5 +46,5 @@ export class StudentService{
             }
         }
         return maxId + 1;
-    }
-}
+    }*/
+
